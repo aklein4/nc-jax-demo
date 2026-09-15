@@ -1,6 +1,6 @@
 # Run:   kubectl apply -f job.yaml
 # Watch: kubectl logs -f job/jax-demo --pod-running-timeout=24h
-# Clean: kubectl delete job jax-demo 
+# Clean: kubectl delete job jax-demo --wait=true
 apiVersion: batch/v1
 kind: Job
 metadata:
