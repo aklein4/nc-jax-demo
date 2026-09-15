@@ -6,6 +6,7 @@
 import logging
 import os
 import time
+from functools import partial
 
 import jax
 import jax.numpy as jnp
@@ -66,9 +67,10 @@ def main():
     with jax.set_mesh(mesh):
         opt_state = optimizer.init(params)
 
-    jax.block_until_ready((params, opt_state))
+    # jax.block_until_ready((params, opt_state))
     logger.info("initialization complete")
 
+    # @partial(jax.jit, donate_argnums=(0, 1))
     @jax.jit
     def train_step(params, opt_state, batch):
         loss, grads = jax.value_and_grad(loss_fn)(params, batch)
