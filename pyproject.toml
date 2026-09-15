@@ -1,0 +1,19 @@
+[project]
+name = "nc-jax-demo"
+version = "0.1.0"
+description = "Minimal single-process multi-GPU JAX training reproducer."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "jax==0.11.1",
+    "numpy==2.5.2",
+    "optax==0.2.8",
+]
+
+[project.optional-dependencies]
+rocm = ["jax[rocm7-local]==0.11.1"]
+cuda = ["jax[cuda12]==0.11.1"]
+
+[tool.uv]
+package = false
+required-version = "==0.11.21"
+conflicts = [[{ extra = "rocm" }, { extra = "cuda" }]]

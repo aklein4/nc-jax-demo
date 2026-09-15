@@ -1,0 +1,61 @@
+# Run:   kubectl apply -f job.yaml
+# Watch: kubectl logs -f job/jax-demo --pod-running-timeout=24h
+# Clean: kubectl delete job jax-demo 
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jax-demo
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels: { app: jax-demo }
+    spec:
+      restartPolicy: Never
+      tolerations:
+        - key: amd.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: train
+          # Published image providing Ubuntu, Python 3.12, ROCm, and PyTorch.
+          # Our startup script installs JAX separately; training does not use PyTorch.
+          image: rocm/pytorch:rocm7.2.4_ubuntu24.04_py3.12_pytorch_release_2.10.0
+          resources:
+            limits:
+              amd.com/gpu: 8
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            # https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.1/install/3rd-party/jax-install.html
+            - name: LLVM_PATH
+              value: "/opt/rocm/llvm"
+            - name: JAX_PLATFORMS
+              value: "rocm"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: shm
+              mountPath: /dev/shm
+          workingDir: /workspace
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              git clone https://github.com/aklein4/nc-jax-demo.git
+              cd nc-jax-demo
+              git rev-parse HEAD
+              python3 -m pip install "uv==$(cat .uv-version)"
+              uv sync --locked --extra rocm --python "$(cat .python-version)"
+              exec uv run --no-sync python main.py
+      volumes:
+        - name: shm
+          emptyDir: { medium: Memory, sizeLimit: 8Gi }
+        - name: shared
+          # no `type`: a node without the shared volume must not fail the
+          # job — the script checks what is mounted and skips the file
+          hostPath:
+            path: /mnt/shared
