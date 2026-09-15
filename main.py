@@ -70,8 +70,7 @@ def main():
     # jax.block_until_ready((params, opt_state))
     logger.info("initialization complete")
 
-    # @partial(jax.jit, donate_argnums=(0, 1))
-    @jax.jit
+    @partial(jax.jit, donate_argnums=(0, 1))
     def train_step(params, opt_state, batch):
         loss, grads = jax.value_and_grad(loss_fn)(params, batch)
         updates, opt_state = optimizer.update(grads, opt_state, params)
