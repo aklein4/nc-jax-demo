@@ -85,10 +85,10 @@ def main():
             inputs = rng.standard_normal((BATCH_SIZE, WIDTH), dtype=np.float32)
             batch = jax.make_array_from_process_local_data(batch_sharding, inputs)
 
-            if step == 1:
-                logger.info("Compiling first training step...")
-                train_step = train_step.lower(params, opt_state, batch).compile()
-                logger.info("Compilation complete; executing first training step...")
+            # if step == 1:
+            #     logger.info("Compiling first training step...")
+            #     train_step = train_step.lower(params, opt_state, batch).compile()
+            #     logger.info("Compilation complete; executing first training step...")
 
             params, opt_state, loss = train_step(params, opt_state, batch)
             loss = float(jax.device_get(loss))
