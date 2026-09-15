@@ -20,11 +20,15 @@ logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
 WIDTH = 384
+LAYERS = 3
 
 
 def loss_fn(params, inputs):
-    w1, w2 = params
-    predictions = jax.nn.gelu(inputs @ w1) @ w2
+    def layer(inputs, weights):
+        w1, w2 = weights
+        return jax.nn.gelu(inputs @ w1) @ w2, None
+
+    predictions, _ = jax.lax.scan(layer, inputs, params)
     return jnp.mean((predictions - 1.0) ** 2)
 
 
@@ -55,11 +59,10 @@ def main():
     rng = np.random.default_rng(42)
     params = tuple(
         jax.device_put(
-            rng.standard_normal(shape, dtype=np.float32)
-            / np.sqrt(np.float32(shape[0])),
+            rng.standard_normal(shape, dtype=np.float32) / np.sqrt(np.float32(WIDTH)),
             replicated,
         )
-        for shape in ((WIDTH, WIDTH), (WIDTH, WIDTH))
+        for shape in ((LAYERS, WIDTH, WIDTH), (LAYERS, WIDTH, WIDTH))
     )
 
     # init optimizer
