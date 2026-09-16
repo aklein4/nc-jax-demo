@@ -1,6 +1,6 @@
 # nc-jax-demo
 
-This repo contains a minimal implementation of a jax training loop for testing MI nodes.
+This repo contains a minimal implementation of a jax training loop for testing 8x MI nodes.
 
 Requirements are handled by uv.
 
