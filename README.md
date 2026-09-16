@@ -145,4 +145,5 @@ E0915 03:15:25.101316     398 rendezvous.cc:130] [id=1] This thread is unstuck w
 2026-09-15 03:15:25,328 step=8 loss=1.045209 seconds=0.002486
 2026-09-15 03:15:25,331 step=9 loss=1.001450 seconds=0.002665
 2026-09-15 03:15:25,333 step=10 loss=0.958071 seconds=0.002542
+...
 ```
